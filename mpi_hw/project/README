@@ -1,0 +1,82 @@
+** Motivation **
+
+Initially, I looked into parallel computation of Lyapunov spectra.
+Parallelizing reorthogonalization of vectors is repeatedly carried out,
+so parallelizing the operation should contribute to the efficiency
+of Lyapunov spectra computation (ref. 1, 2).
+Reorthogonalization is essentially to append a new vector v_k to an
+orthogonal basis (q_1, q_2, ... , q_(k-1)), while maintaining
+orthogonality of the basis.
+Gram-Schmidt process is used to compute a new vector q_k orthogonal
+to the vectors in the old basis.
+
+** Algorithms of Gram-Schmidt orthogonalization **
+
+I used ref 3, 4, and 5 to see what (sequential/parallel) algorithms
+are already out in the wild. Classical Gram-Schmidt suffers from
+numerical instability, and it is either avoided or operations to
+enhance numerical stability are used in conjunction.
+For the assignment I'm going to be bold and say I don't care about
+numerical stability, and use Classical Gram-Schmidt algorithm
+to parallelize Gram-Schmidt process.
+
+** Refs **
+
+1. Gunter Radons et al., Parallel Algorithms for the Determination
+of Lyapunov Characteristics of Large Nonlinear Dynamical Systems
+(from Lecture Notes in Computer Science, 2006,
+ Volume 3732/2006, 1131-1140.).
+
+    For the calculation of the Lyapunov exponents and vectors
+    the offset vectors have to be reorthogonalized periodically
+    using Gram-Schmidt orthgonalization.
+    It turns out that the repeated reorthogonalization
+    is the most time consuming part of the computation of
+    Lyapunov spectra and Lyapunov vectors.
+
+
+2. Sprott, Chaos and Time-Series Analysis.
+
+    Numerical computation of Lyapunov spectrum is often done by
+    averaging local Lyapunov exponents at each point of an orbit.
+    Alternatively, multiply together the Jacobian matrices
+    at all time steps along the orbit and then calculate the
+    eigenvalues of the resulting product matrix (Oseledec, 1968).
+    The method is straightforward but computationally intensive.
+    In practice, it fails with a chaotic system for two reasons.
+    First, the individual terms of the cumulative product matrix
+    grow exponentially. Second, the eigenvectors all tend to
+    align in the direction of maximum growth and hence do not
+    accurately span the space.
+    
+    Both of these problems are overcome using Gram-Schmidt
+    reorthonormalization, which factors out a large scalar
+    multiplier to prevent divergence and does row reduction
+    with pivoting to retain the independence of the columns
+    of the product matrix.
+
+
+3. Katagiri, Performance Evaluation of Parallel Gram-Schmidt
+Reorthogonalization Methods.
+
+    summary:
+      Classical Gram-Schmidt -> Parallelism (lower accuracy)
+      Modified  Gram-Schmidt -> No parallelism (higher accuracy)
+
+
+4. Giraud and Langou. The Loss of Orthogonality in the
+Gram-Schmidt Orthogonalization Process.
+
+    Numerical experiements have shown that a basis computed by
+    the Gram-Schmidt orthogonalization algorithms (Classical
+    and Modified) may be far from being orthogonal.
+    This problem can be avoided by reorthogonalizing vectors
+    within the algorithms.
+
+
+5. Rangarajan, Habib, and Ryne. Lyapunov Exponents
+without Rescaling and Reorthogonalization.
+
+    People at Los Alamos figured out a way to compute Lyapunov
+    exponents without needing to orthogonalize or normalize
+    vectors during the process. Totally bad ass! 

@@ -1,0 +1,37 @@
+An implementation of LIST-RANK.
+ - Run 'make' to compile. (It needs to link mergesort code to the list rank code.)
+ - If it doesn't compile, try compiling it on trent.
+ - 'run.sh' contains an example of running 'list_rank'.
+
+THE CODE:
+
+1. (Pre-processing) 
+       Unlike the pseudocode, an actual implementation requires each node
+   to know its predecessor. Each node with a predecessor waits for its
+   predecessor to talk to it. To compute whether a node has a predecessor,
+   parallel merge-sort is used to sort the list of 'nexts', then the
+   sorted list is broadcasted to all processors. Each processor
+   searchs for its ID in the sorted list using divide-and-conquer method.
+   If it does not find its ID in the list, the processor does not have
+   a predecessor. See 'p_msort.c'.
+   This step takes O((log n)^2) time:
+    - Parallel Mergesort = O((log n)^2) (I was hoping that this would be O(log n))
+    - Broadcast = O(log n)
+    - Divide-and-conquer Search = O(log n)
+
+   *** The mergesort has a bug that I could never find. It works only
+       for lists of length less than or equal to 6. To avoid the problem
+       I replaced the mergesort -> braodcast -> divide-and-conquer search
+       routine with a simple look-up method, which would take O(n)-time
+
+2. (LIST-RANK)
+      After the preprocessing, we initialize list-rank. The code faithfully
+   follows the pseudocode, except for the additional instructions for
+   tracking the predecessor of each node. Just like 'next' is set to 'next'
+   of 'next' at each step, 'pred' is set to 'pred' of 'pred' to keep track
+   of predecessor nodes.
+
+3. (Visualization)
+      Draw the result using gtk and cairo. Currently, it only prints out
+   the nodes, and their ranks. I tried to draw arrows to indicate
+   'nexts' but cairo doesn't have nice primitives for it.
